@@ -1,4 +1,5 @@
 from collections import UserDict
+from processing import PhoneVerificationError
 
 class Field:
     def __init__(self, value):
@@ -12,8 +13,11 @@ class Name(Field):
 		pass
 
 class Phone(Field):
-    # реалізація класу
-		pass
+    def __init__(self, value: str):
+        if len(value) == 10:
+            super().__init__(value)
+        else:
+             raise PhoneVerificationError()
 
 class Record:
     def __init__(self, name):
@@ -21,65 +25,35 @@ class Record:
         self.phones = []
 
     # реалізація класу
+    def add_phone(self, phone):
+          if not self.find_phone(phone):
+               self.phones.append(Phone(phone))
+
+    def remove_phone(self, phone):
+          self.phones.remove(self.find_phone(phone))
+
+    def edit_phone(self, old_phone, new_phone):
+          self.find_phone(old_phone).value = new_phone
+
+    def find_phone(self, phone):
+          phones = list(filter(lambda ph: ph.value == phone, self.phones))
+          if len(phones):
+               return phones[0]
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
 
 class AddressBook(UserDict):
+    def __init__(self, iterable = {}):
+          super().__init__(iterable)
+
     # реалізація класу
-		pass
+          
+    def add_record(self, record: Record):
+          self.data[record.name.value] = record
 
-
-# Критерії оцінювання
-
-# Клас AddressBook:
-
-# Реалізовано метод add_record, який додає запис до self.data.
-# Реалізовано метод find, який знаходить запис за ім'ям.
-# Реалізовано метод delete, який видаляє запис за ім'ям.
-
-
-# Клас Record:
-
-# Реалізовано зберігання об'єкта Name в окремому атрибуті.
-# Реалізовано зберігання списку об'єктів Phone в окремому атрибуті.
-# Реалізовано методи для додавання — add_phone / видалення — remove_phone / редагування — edit_phone / пошуку об'єктів Phone — find_phone.
-
-
-# Клас Phone:
-
-# Реалізовано валідацію номера телефону (має бути перевірка на 10 цифр).
-
-
-# Створення нової адресної книги
-book = AddressBook()
-
-# Створення запису для John
-john_record = Record("John")
-john_record.add_phone("1234567890")
-john_record.add_phone("5555555555")
-
-# Додавання запису John до адресної книги
-book.add_record(john_record)
-
-# Створення та додавання нового запису для Jane
-jane_record = Record("Jane")
-jane_record.add_phone("9876543210")
-book.add_record(jane_record)
-
-# Виведення всіх записів у книзі
-for name, record in book.data.items():
-    print(record)
-
-# Знаходження та редагування телефону для John
-john = book.find("John")
-john.edit_phone("1234567890", "1112223333")
-
-print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
-
-# Пошук конкретного телефону в записі John
-found_phone = john.find_phone("5555555555")
-print(f"{john.name}: {found_phone}")  # Виведення: 5555555555
-
-# Видалення запису Jane
-book.delete("Jane")
+    def find(self, name: str) -> Record:
+          return self.data.get(name)
+    
+    def delete(self, name: str):
+          self.data.pop(name)

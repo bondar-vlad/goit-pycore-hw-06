@@ -11,6 +11,11 @@ def input_error(func):
             return "Contact not found."
     return inner
 
+class PhoneVerificationError(Exception):
+    def __init__(self, message="Phone should contain 10 digits"):
+        self.message = message
+        super().__init__(self.message)
+
 @input_error
 def add_contact(args, contacts):
     name, phone = args
